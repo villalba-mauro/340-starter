@@ -11,19 +11,7 @@ const env = require("dotenv").config()
 const app = express()
 const static = require("./routes/static")
 
-/* ***********************
- * Database Connection
- *************************/
-const { Pool } = require("pg")
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-})
 
-// Make the pool available to the app
-app.locals.pool = pool
 
 
 /* ***********************
@@ -50,19 +38,7 @@ app.get("/", function(req, res){
 const port = process.env.PORT
 const host = process.env.HOST
 
-/* ***********************
- * Error handling
- *************************/
-// 404 Page not found
-app.use(function (req, res, next) {
-  res.status(404).render("errors/404", { title: "404 - Page Not Found" })
-})
 
-// 500 Server Error
-app.use(function (err, req, res, next) {
-  console.error(err.stack)
-  res.status(500).render("errors/500", { title: "500 - Server Error" })
-})
 
 /* ***********************
  * Log statement to confirm server operation
