@@ -28,7 +28,9 @@ app.use(static)
 
 // Index route
 app.get("/", function(req, res){
-  res.render("index", {title: "Home"})
+  res.render("index", {title: "Home",
+    nav: "<ul><li><a href='/'>Home</a></li><li><a href='/custom'>Custom</a></li><li><a href='/sedan'>Sedan</a></li><li><a href='/suv'>SUV</a></li><li><a href='/truck'>Truck</a></li></ul>"
+  })
 })
 
 /* ***********************
