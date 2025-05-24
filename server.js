@@ -2,6 +2,7 @@
  * This server.js file is the primary file of the 
  * application. It is used to control the project.
  *******************************************/
+
 /* ***********************
  * Require Statements
  *************************/
@@ -10,9 +11,9 @@ const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
 const app = express()
 const static = require("./routes/static")
-
-
-
+const baseController = require("./controllers/baseController")
+const inventoryRoute = require("./routes/inventoryRoute")
+const utilities = require("./utilities/") // AGREGADO: Importar utilities
 
 /* ***********************
  * View Engine and Templates
@@ -27,9 +28,38 @@ app.set("layout", "./layouts/layout") // not at views root
 app.use(static)
 
 // Index route
-app.get("/", function(req, res){
-  res.render("index", {title: "Home",
-    nav: "<ul><li><a href='/'>Home</a></li><li><a href='/custom'>Custom</a></li><li><a href='/sedan'>Sedan</a></li><li><a href='/suv'>SUV</a></li><li><a href='/truck'>Truck</a></li></ul>"
+app.get("/", utilities.handleErrors(baseController.buildHome))
+
+// Inventory routes
+app.use("/inv", inventoryRoute)
+
+// File Not Found Route - must be last route in list
+app.use(async (req, res, next) => {
+  next({status: 404, message: 'Sorry, we appear to have lost that page.'})
+})
+
+/* ***********************
+* Express Error Handler - TASK 2: Middleware de manejo de errores
+* Place after all other middleware
+* Esta función captura TODOS los errores de la aplicación
+*************************/
+app.use(async (err, req, res, next) => {
+  let nav = await utilities.getNav()
+  console.error(`Error at: "${req.originalUrl}": ${err.message}`)
+  
+  // Determina el mensaje según el tipo de error
+  let message
+  if(err.status == 404){ 
+    message = err.message
+  } else {
+    message = 'Oh no! There was a crash. Maybe try a different route?'
+  }
+  
+  // Renderiza la vista de error con información relevante
+  res.render("errors/error", {
+    title: err.status || 'Server Error',
+    message,
+    nav
   })
 })
 
@@ -40,12 +70,9 @@ app.get("/", function(req, res){
 const port = process.env.PORT
 const host = process.env.HOST
 
-
-
 /* ***********************
  * Log statement to confirm server operation
  *************************/
-
 app.listen(port, () => {
   console.log(`app listening on ${host}:${port}`)
 })

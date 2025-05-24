@@ -1,0 +1,13 @@
+<%# Content Heading - Displays the title of the classification %>
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else {
+  res.redirect('/')
+} %>
+
+<%# Message Display - Will show any system messages (currently disabled) %>
+<%# messages() %>
+
+<%# Inventory Display - Shows all vehicles in the selected classification %>
+<%- grid %>
+

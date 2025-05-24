@@ -1,0 +1,13 @@
+<%# Vehicle Detail Page - Página de detalle del vehículo %>
+
+<%# Content Heading - Displays the vehicle title in both title and h1 %>
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else { %>
+<h1>Vehicle Details</h1>
+<% } %>
+
+<%# Vehicle Detail Display - Shows the detailed vehicle information %>
+<div class="detail-container">
+  <%- detailHtml %>
+</div>

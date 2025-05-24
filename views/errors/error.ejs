@@ -1,0 +1,25 @@
+<!-- Error Page Title - Título de la página de error -->
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else { %>
+<h1>Server Error</h1>
+<% } %>
+
+<!-- Error Message Display - Mostrar mensaje de error -->
+<div class="error-message">
+  <%- message %>
+</div>
+
+<div class="error-content">
+  <% if (title && title == '404') { %>
+    <p>The page you're looking for doesn't exist or may have been moved.</p>
+  <% } else { %>
+    <p>Something went wrong on our end. Our technical team has been notified and is working to resolve the issue.</p>
+  <% } %>
+  
+  <!-- Navigation Options - Opciones de navegación para el usuario -->
+  <div class="error-actions">
+    <a href="/" class="btn-primary">Return to Home</a>
+    <button onclick="history.back()" class="btn-secondary">Go Back</button>
+  </div>
+</div>
