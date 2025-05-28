@@ -17,6 +17,7 @@ const utilities = require("./utilities/")
 const session = require("express-session")
 const pool = require('./database/')
 const accountRoute = require("./routes/accountRoute")
+const bodyParser = require("body-parser")
 /* ***********************
  * View Engine and Templates
  *************************/
