@@ -1,0 +1,199 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+
+<!-- Flash message display area -->
+<div class="pop-up"><%- messages() %></div>
+
+<!-- Server-side errors display -->
+<% if (errors) { %>
+<ul class="notice">
+  <% errors.array().forEach(error => { %>
+  <li><%= error.msg %></li>
+  <% }) %>
+</ul>
+<% } %>
+
+<div class="form-container">
+  <form id="addClassificationForm" class="form" action="/inv/add-classification" method="post">
+    <fieldset>
+      <legend>Add New Classification</legend>
+      
+      <div class="form-instructions">
+        <p><strong>Requirements:</strong></p>
+        <ul>
+          <li>Classification name is required</li>
+          <li>Must contain only alphabetic characters</li>
+          <li>No spaces or special characters allowed</li>
+        </ul>
+      </div>
+      
+      <div class="flex-column">
+        <label for="classification_name">Classification Name:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="classification_name" 
+          name="classification_name" 
+          placeholder="Enter classification name"
+          pattern="[A-Za-z]+"
+          title="Only alphabetic characters are allowed. No spaces or special characters."
+          required
+          value="<%= locals.classification_name || '' %>"
+        />
+      </div>
+      
+      <button class="button-submit" type="submit">Add Classification</button>
+    </fieldset>
+  </form>
+  
+  <div class="back-link">
+    <a href="/inv/">← Back to Management</a>
+  </div>
+</div>
+
+<style>
+  .form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 25px;
+    background-color: #f9f9f9;
+  }
+  
+  legend {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    padding: 0 10px;
+    background-color: white;
+  }
+  
+  .form-instructions {
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .form-instructions p {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+    color: #495057;
+  }
+  
+  .form-instructions ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #6c757d;
+  }
+  
+  .form-instructions li {
+    margin-bottom: 5px;
+  }
+  
+  .flex-column {
+    margin-bottom: 10px;
+  }
+  
+  .inputForm {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+  
+  .input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+  
+  /* Validación visual HTML5 */
+  .input:required:valid {
+    border-color: #28a745;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2328a745"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 35px;
+  }
+  
+  .input:required:invalid, .input:focus:invalid {
+    border-color: #dc3545;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dc3545"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 35px;
+  }
+  
+  .button-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .button-submit:hover {
+    background-color: #218838;
+  }
+  
+  .back-link {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .back-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .notice {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .notice li {
+    margin-bottom: 5px;
+  }
+</style>
+
+<% } else { 
+  res.redirect('/') 
+} %>

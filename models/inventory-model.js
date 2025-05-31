@@ -1,3 +1,4 @@
+// const { addClassification } = require("../controllers/invController")
 const pool = require("../database/")
 
 /* ***************************
@@ -43,9 +44,21 @@ async function getInventoryByInvId(inv_id) {
   }
 }
 
+/* ***************************
+ *  Add new classification
+ * ************************** */
+async function addClassification(classification_name) {
+  try {
+    const sql = "INSERT INTO public.classification (classification_name) VALUES ($1) RETURNING *"
+    return await pool.query(sql, [classification_name])
+  } catch (error) {
+    return error.message
+  }
+}
 // CORRECCIÓN: module.exports al final del archivo
 module.exports = {
   getClassifications, 
   getInventoryByClassificationId, 
-  getInventoryByInvId
-};
+  getInventoryByInvId,
+  addClassification
+}

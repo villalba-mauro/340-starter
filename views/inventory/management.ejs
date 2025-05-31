@@ -1,0 +1,15 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } else { res.redirect('/') } %> <% messages() %>
+<br />
+<p><a href="/inv/add-classification">Add New Classification</a></p>
+<p><a href="/inv/new-vehicle">Add New Vehicle</a></p>
+<br />
+
+<h2>Manage Inventory</h2>
+<p>Choose a classification to see those inventory items.</p>
+<%- classificationSelect  %>
+
+<table id ="inventoryDisplay"></table>
+
+<noscript>JavaScript must ve anabled to use this page.</noscript>
