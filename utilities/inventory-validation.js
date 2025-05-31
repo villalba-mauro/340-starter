@@ -167,9 +167,5 @@ validate.checkVehicleData = async (req, res, next) => {
 
 
 
-module.exports = {
-  classificationRules,
-  checkClassificationData,
-  vehicleRules,        // <- AGREGAR
-  checkVehicleData     // <- AGREGAR
-}
+// OPCIÓN MÁS SIMPLE - Reemplazar todo el module.exports:
+module.exports = validate
