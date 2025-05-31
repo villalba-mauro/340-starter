@@ -1,4 +1,5 @@
 // const { addClassification } = require("../controllers/invController")
+// const { addVehicle } = require("../controllers/invController")
 const pool = require("../database/")
 
 /* ***************************
@@ -55,10 +56,54 @@ async function addClassification(classification_name) {
     return error.message
   }
 }
+
+/* ***************************
+ *  Add new vehicle (FUNCIÓN FALTANTE)
+ *  Esta función agrega un nuevo vehículo a la base de datos
+ * ************************** */
+async function addVehicle(
+  classification_id,
+  inv_make,
+  inv_model,
+  inv_year,
+  inv_description,
+  inv_image,
+  inv_thumbnail,
+  inv_price,
+  inv_miles,
+  inv_color
+) {
+  try {
+    // Consulta SQL INSERT con todos los campos del vehículo
+    const sql = `INSERT INTO public.inventory 
+      (classification_id, inv_make, inv_model, inv_year, inv_description, 
+       inv_image, inv_thumbnail, inv_price, inv_miles, inv_color) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+      RETURNING *`
+    
+    return await pool.query(sql, [
+      classification_id,
+      inv_make,
+      inv_model,
+      inv_year,
+      inv_description,
+      inv_image,
+      inv_thumbnail,
+      inv_price,
+      inv_miles,
+      inv_color
+    ])
+  } catch (error) {
+    console.error("addVehicle error: " + error)
+    return error.message
+  }
+}
+
 // CORRECCIÓN: module.exports al final del archivo
 module.exports = {
   getClassifications, 
   getInventoryByClassificationId, 
   getInventoryByInvId,
-  addClassification
+  addClassification,
+  addVehicle
 }

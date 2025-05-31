@@ -23,6 +23,17 @@ router.post(
   utilities.handleErrors(invController.addClassification)
 );
 
+// Route to build add vehicle view (NUEVA RUTA)
+router.get("/add-vehicle", utilities.handleErrors(invController.buildAddVehicle));
+
+// Route to process add vehicle (NUEVA RUTA con validaciones)
+router.post(
+  "/add-vehicle",
+  invValidate.vehicleRules(),
+  invValidate.checkVehicleData,
+  utilities.handleErrors(invController.addVehicle)
+);
+
 // TASK 3: Intentional Error Route (ruta para generar error intencional)
 router.get("/trigger-error", utilities.handleErrors(invController.triggerError));
 

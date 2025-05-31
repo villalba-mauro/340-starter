@@ -36,13 +36,18 @@ invCont.buildByInvId = async function (req, res, next) {
 }
 
 /* ***************************
- *  Build management view (TASK 1)
+ *  Build management view 
  * ************************** */
 invCont.buildManagement = async function (req, res, next) {
   let nav = await utilities.getNav()
+  
+  // AGREGAR ESTA LÍNEA:
+  const classificationSelect = await utilities.buildClassificationList()
+  
   res.render("./inventory/management", {
     title: "Vehicle Management",
     nav,
+    classificationSelect, // AGREGAR ESTA LÍNEA
   })
 }
 
@@ -76,6 +81,7 @@ invCont.addClassification = async function (req, res) {
     res.status(201).render("./inventory/management", {
       title: "Vehicle Management",
       nav,
+      classificationSelect: await utilities.buildClassificationList(), // AGREGAR ESTA LÍNEA
     })
   } else {
     req.flash("notice", "Sorry, adding the classification failed.")
@@ -96,5 +102,94 @@ invCont.triggerError = async function (req, res, next) {
   throw new Error("This is an intentional 500 error for testing purposes!")
 }
 
+/* ***************************
+ *  Build add vehicle view (FUNCIÓN FALTANTE)
+ *  Esta función construye la vista para agregar nuevos vehículos
+ * ************************** */
+invCont.buildAddVehicle = async function (req, res, next) {
+  let nav = await utilities.getNav()
+  
+  // Construye el dropdown de clasificaciones
+  let classificationSelect = await utilities.buildClassificationList()
+  
+  res.render("./inventory/add-vehicle", {
+    title: "Add New Vehicle",
+    nav,
+    classificationSelect,
+    errors: null,
+  })
+}
+
+/* ***************************
+ *  Esta función procesa el formulario de agregar vehículo
+ * ************************** */
+invCont.addVehicle = async function (req, res) {
+  let nav = await utilities.getNav()
+  let classificationSelect = await utilities.buildClassificationList()
+  
+  // Extrae todos los campos del vehículo del cuerpo de la petición
+  const {
+    classification_id,
+    inv_make,
+    inv_model,
+    inv_year,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_miles,
+    inv_color
+  } = req.body
+
+  // Intenta agregar el vehículo a la base de datos
+  const addResult = await invModel.addVehicle(
+    classification_id,
+    inv_make,
+    inv_model,
+    inv_year,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_miles,
+    inv_color
+  )
+
+  if (addResult) {
+    // Si es exitoso, muestra mensaje de éxito
+    req.flash(
+      "notice",
+      `The ${inv_year} ${inv_make} ${inv_model} was successfully added.`
+    )
+    res.status(201).render("./inventory/management", {
+      title: "Vehicle Management",
+      nav,
+      classificationSelect: await utilities.buildClassificationList(),
+    })
+  } else {
+    // Si falla, muestra mensaje de error y regresa al formulario con datos (form stickiness)
+    req.flash("notice", "Sorry, adding the vehicle failed.")
+    res.status(501).render("./inventory/add-vehicle", {
+      title: "Add New Vehicle",
+      nav,
+      classificationSelect,
+      errors: null,
+      // Form stickiness: mantiene los datos ingresados
+      classification_id,
+      inv_make,
+      inv_model,
+      inv_year,
+      inv_description,
+      inv_image,
+      inv_thumbnail,
+      inv_price,
+      inv_miles,
+      inv_color
+    })
+  }
+}
+
+// AGREGAR estas funciones al final del archivo, antes de:
+// module.exports = invCont
 
 module.exports = invCont
