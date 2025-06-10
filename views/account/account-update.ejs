@@ -1,0 +1,329 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+
+<!-- Flash message display area -->
+<div class="pop-up"><%- messages() %></div>
+
+<!-- Server-side errors display -->
+<% if (errors) { %>
+<ul class="notice">
+  <% errors.array().forEach(error => { %>
+  <li><%= error.msg %></li>
+  <% }) %>
+</ul>
+<% } %>
+
+<div class="account-update-container">
+  
+  <!-- ========== FORMULARIO 1: ACCOUNT UPDATE ========== -->
+  <div class="form-section">
+    <h2>Account Update</h2>
+    <p>Update your personal information below. All fields are required.</p>
+    
+    <form id="accountUpdateForm" action="/account/update-info" method="post">
+      <!-- Hidden field for account_id -->
+      <input type="hidden" name="account_id" value="<%= locals.account_id || '' %>">
+      
+      <fieldset>
+        <legend>Personal Information</legend>
+        
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="account_firstname">First Name: *</label>
+          <input 
+            type="text" 
+            class="form-input"
+            id="account_firstname" 
+            name="account_firstname" 
+            placeholder="Enter your first name"
+            minlength="1"
+            pattern="[A-Za-z\s]+"
+            title="First name can only contain letters and spaces"
+            required
+            value="<%= locals.account_firstname || '' %>"
+          />
+        </div>
+        
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="account_lastname">Last Name: *</label>
+          <input 
+            type="text" 
+            class="form-input"
+            id="account_lastname" 
+            name="account_lastname" 
+            placeholder="Enter your last name"
+            minlength="1"
+            pattern="[A-Za-z\s]+"
+            title="Last name can only contain letters and spaces"
+            required
+            value="<%= locals.account_lastname || '' %>"
+          />
+        </div>
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="account_email">Email Address: *</label>
+          <input 
+            type="email" 
+            class="form-input"
+            id="account_email" 
+            name="account_email" 
+            placeholder="Enter your email address"
+            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+            title="Please enter a valid email address"
+            required
+            value="<%= locals.account_email || '' %>"
+          />
+        </div>
+        
+        <button type="submit" class="btn-primary">Update Account</button>
+      </fieldset>
+    </form>
+  </div>
+  
+  <!-- ========== FORMULARIO 2: CHANGE PASSWORD ========== -->
+  <div class="form-section">
+    <h2>Change Password</h2>
+    <p><strong>Password Requirements:</strong> Minimum 12 characters, at least 1 capital letter, 1 number, and 1 special character.</p>
+    <p><em>Note: Entering a new password will replace your current password.</em></p>
+    
+    <form id="passwordChangeForm" action="/account/update-password" method="post">
+      <!-- Hidden field for account_id -->
+      <input type="hidden" name="account_id" value="<%= locals.account_id || '' %>">
+      
+      <fieldset>
+        <legend>New Password</legend>
+        
+        <!-- New Password -->
+        <div class="form-group">
+          <label for="account_password">New Password: *</label>
+          <input 
+            type="password" 
+            class="form-input"
+            id="account_password" 
+            name="account_password" 
+            placeholder="Enter new password"
+            minlength="12"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$"
+            title="Password must be at least 12 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character"
+            required
+          />
+          <small class="password-help">
+            Must contain: 12+ characters, 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character (@$!%*?&)
+          </small>
+        </div>
+        
+        <button type="submit" class="btn-warning">Change Password</button>
+      </fieldset>
+    </form>
+  </div>
+  
+  <!-- Back link -->
+  <div class="back-link">
+    <a href="/account/">← Back to Account Management</a>
+  </div>
+  
+</div>
+
+<style>
+.account-update-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.form-section {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-section h2 {
+  color: #333;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px;
+}
+
+.form-section p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+fieldset {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 20px;
+  background-color: white;
+}
+
+legend {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+  padding: 0 10px;
+  background-color: white;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.form-input:valid {
+  border-color: #28a745;
+}
+
+.form-input:invalid:not(:placeholder-shown) {
+  border-color: #dc3545;
+}
+
+.password-help {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.85em;
+  color: #666;
+  font-style: italic;
+}
+
+.btn-primary, .btn-warning {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.back-link a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+}
+
+.notice {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.notice li {
+  margin-bottom: 5px;
+}
+
+.pop-up {
+  margin-bottom: 20px;
+}
+</style>
+
+<!-- JavaScript for additional validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const accountForm = document.getElementById('accountUpdateForm');
+  const passwordForm = document.getElementById('passwordChangeForm');
+  const passwordInput = document.getElementById('account_password');
+  
+  // Real-time password validation feedback
+  passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const isValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(password);
+    
+    if (password.length > 0) {
+      if (isValid) {
+        this.style.borderColor = '#28a745';
+        this.style.backgroundColor = '#f8fff9';
+      } else {
+        this.style.borderColor = '#dc3545';
+        this.style.backgroundColor = '#fff8f8';
+      }
+    } else {
+      this.style.borderColor = '#ccc';
+      this.style.backgroundColor = 'white';
+    }
+  });
+  
+  // Form validation before submit
+  accountForm.addEventListener('submit', function(e) {
+    const firstName = document.getElementById('account_firstname').value.trim();
+    const lastName = document.getElementById('account_lastname').value.trim();
+    const email = document.getElementById('account_email').value.trim();
+    
+    if (!firstName || !lastName || !email) {
+      e.preventDefault();
+      alert('All fields are required.');
+      return false;
+    }
+  });
+  
+  passwordForm.addEventListener('submit', function(e) {
+    const password = document.getElementById('account_password').value;
+    const isValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(password);
+    
+    if (!isValid) {
+      e.preventDefault();
+      alert('Password does not meet the requirements.');
+      return false;
+    }
+  });
+});
+</script>
+
+<% } else { res.redirect('/') } %>

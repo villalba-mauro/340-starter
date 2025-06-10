@@ -6,19 +6,31 @@
     </span>
   </div>
   <div id="tools">
-    <a
-      id="call-to-action"
-      class="call-to-action"
-      title="Click to log in"
-      href="/account/login"
-      >My Account</a
-    >
-    <a
-      id="log-out"
-      class="call-to-action"
-      href="/account/logout"
-      style="display: none"
-      >Log out</a
-    >
+    <% if (locals.loggedin) { %>
+      <!-- 👤 USUARIO LOGUEADO: Mostrar Welcome + Logout -->
+      <a
+        id="welcome-link"
+        class="call-to-action"
+        title="Click to go to account management"
+        href="/account/"
+        >Welcome <%= locals.accountData.account_firstname %></a
+      >
+      <a
+        id="log-out"
+        class="call-to-action"
+        title="Click to log out"
+        href="/account/logout"
+        >Logout</a
+      >
+    <% } else { %>
+      <!-- 🚪 USUARIO NO LOGUEADO: Mostrar My Account -->
+      <a
+        id="call-to-action"
+        class="call-to-action"
+        title="Click to log in"
+        href="/account/login"
+        >My Account</a
+      >
+    <% } %>
   </div>
 </header>

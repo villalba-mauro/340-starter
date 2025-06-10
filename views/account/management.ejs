@@ -1,0 +1,28 @@
+<% if (title) { %>
+<h1><%= title %></h1>
+
+<!-- Mostrar mensajes flash si existen -->
+<div class="pop-up"><%- messages() %></div>
+
+<!-- Mostrar errores si existen -->
+<% if (errors) { %>
+<div class="error-messages">
+  <% errors.array().forEach(error => { %>
+    <p class="error"><%= error.msg %></p>
+  <% }) %>
+</div>
+<% } %>
+
+<!-- Contenido principal de la gestión de cuenta -->
+<div class="account-management">
+  <div class="welcome-message">
+    <p>You're logged in</p>
+  </div>
+  
+  <!-- Área para futuras funcionalidades de gestión de cuenta -->
+  <div class="account-actions">
+    <!-- Aquí puedes agregar enlaces para editar perfil, cambiar contraseña, etc. -->
+  </div>
+</div>
+
+<% } else { res.redirect('/') } %>

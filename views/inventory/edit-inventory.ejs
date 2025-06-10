@@ -1,0 +1,451 @@
+<% if (title) { %>
+<h1><%= title %></h1>  <!-- Esto mostrará "Edit Ford Mustang" -->
+<% } else { res.redirect('/') } %>
+
+<!-- Flash message display area -->
+<div class="pop-up"><%- messages() %></div>
+
+<!-- Server-side errors display -->
+<% if (errors) { %>
+<ul class="notice">
+  <% errors.array().forEach(error => { %>
+  <li><%= error.msg %></li>
+  <% }) %>
+</ul>
+<% } %>
+
+<div class="form-container">
+  <form id="updateForm" class="form" action="/inv/update" method="post">
+    <!-- 🔴 CAMPO OCULTO OBLIGATORIO PARA EL ID -->
+    <input type="hidden" name="inv_id" value="<%= locals.inv_id || '' %>">
+    
+    <fieldset>
+      <!-- 🔴 CAMBIO: De "Add New Vehicle" a "Edit Vehicle" -->
+      <legend>Edit Vehicle Information</legend>
+      
+      <div class="form-instructions">
+        <!-- 🔴 CAMBIO: Instrucciones específicas para edición -->
+        <p><strong>Editing Vehicle - Validation Requirements:</strong></p>
+        <ul>
+          <li>All fields are required</li>
+          <li>Year must be 4 digits</li>
+          <li>Price can be decimal or integer</li>
+          <li>Miles must be digits only (no commas)</li>
+          <li>Make and Model minimum 3 characters</li>
+          <li>Modify any field and click "Update Vehicle" to save changes</li>
+        </ul>
+      </div>
+      
+      <!-- Classification Select -->
+      <div class="flex-column">
+        <label for="classification_id">Classification:</label>
+      </div>
+      <div class="inputForm">
+        <%- classificationSelect %>
+      </div>
+      
+      <!-- Make Input -->
+      <div class="flex-column">
+        <label for="inv_make">Make:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="inv_make" 
+          name="inv_make" 
+          placeholder="Enter vehicle make"
+          minlength="3"
+          pattern="[A-Za-z\s\-]+"
+          title="Make must be at least 3 characters. Only letters, spaces, and hyphens allowed."
+          required
+          value="<%= locals.inv_make || '' %>"
+        />
+      </div>
+      
+      <!-- Model Input -->
+      <div class="flex-column">
+        <label for="inv_model">Model:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="inv_model" 
+          name="inv_model" 
+          placeholder="Enter vehicle model"
+          minlength="3"
+          pattern="[A-Za-z0-9\s\-]+"
+          title="Model must be at least 3 characters. Only letters, numbers, spaces, and hyphens allowed."
+          required
+          value="<%= locals.inv_model || '' %>"
+        />
+      </div>
+      
+      <!-- Year Input -->
+      <div class="flex-column">
+        <label for="inv_year">Year (4 digits):</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="number" 
+          class="input"
+          id="inv_year" 
+          name="inv_year" 
+          placeholder="2024"
+          min="1900"
+          max="<%= new Date().getFullYear() + 1 %>"
+          pattern="[0-9]{4}"
+          title="Year must be 4 digits."
+          required
+          value="<%= locals.inv_year || '' %>"
+        />
+      </div>
+      
+      <!-- Description Input -->
+      <div class="flex-column">
+        <label for="inv_description">Description:</label>
+      </div>
+      <div class="inputForm">
+        <textarea 
+          class="input textarea"
+          id="inv_description" 
+          name="inv_description" 
+          placeholder="Enter vehicle description"
+          rows="4"
+          required
+        ><%= locals.inv_description || '' %></textarea>
+      </div>
+      
+      <!-- Image Path Input -->
+      <div class="flex-column">
+        <label for="inv_image">Image Path:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="inv_image" 
+          name="inv_image" 
+          placeholder="/images/vehicles/vehicle-name.jpg"
+          pattern="^/images/.*\.(jpg|jpeg|png|gif)$"
+          title="Image path must start with /images/ and end with .jpg, .jpeg, .png, or .gif"
+          required
+          value="<%= locals.inv_image || '/images/vehicles/no-image.png' %>"
+        />
+      </div>
+      
+      <!-- Thumbnail Path Input -->
+      <div class="flex-column">
+        <label for="inv_thumbnail">Thumbnail Path:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="inv_thumbnail" 
+          name="inv_thumbnail" 
+          placeholder="/images/vehicles/vehicle-name-tn.jpg"
+          pattern="^/images/.*\.(jpg|jpeg|png|gif)$"
+          title="Thumbnail path must start with /images/ and end with .jpg, .jpeg, .png, or .gif"
+          required
+          value="<%= locals.inv_thumbnail || '/images/vehicles/no-image-tn.png' %>"
+        />
+      </div>
+      
+      <!-- Price Input -->
+      <div class="flex-column">
+        <label for="inv_price">Price (decimal or integer):</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="number" 
+          class="input"
+          id="inv_price" 
+          name="inv_price" 
+          placeholder="25000.99"
+          min="0"
+          step="0.01"
+          title="Price must be a positive number. Decimal or integer allowed."
+          required
+          value="<%= locals.inv_price || '' %>"
+        />
+      </div>
+      
+      <!-- Miles Input -->
+      <div class="flex-column">
+        <label for="inv_miles">Miles (digits only):</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="number" 
+          class="input"
+          id="inv_miles" 
+          name="inv_miles" 
+          placeholder="39500"
+          min="0"
+          step="1"
+          pattern="[0-9]+"
+          title="Miles must be digits only. No commas or spaces allowed."
+          required
+          value="<%= locals.inv_miles || '' %>"
+        />
+      </div>
+      
+      <!-- Color Input -->
+      <div class="flex-column">
+        <label for="inv_color">Color:</label>
+      </div>
+      <div class="inputForm">
+        <input 
+          type="text" 
+          class="input"
+          id="inv_color" 
+          name="inv_color" 
+          placeholder="Enter vehicle color"
+          pattern="[A-Za-z\s]+"
+          title="Color is required. Only letters and spaces allowed."
+          required
+          value="<%= locals.inv_color || '' %>"
+        />
+      </div>
+      
+      <!-- 🔴 CAMBIO: De "Add Vehicle" a "Update Vehicle" -->
+      <button class="button-submit" type="submit" disabled>Update Vehicle</button>
+    </fieldset>
+  </form>
+  
+  <div class="back-link">
+    <a href="/inv/">← Back to Management</a>
+  </div>
+</div>
+
+<style>
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 25px;
+    background-color: #f9f9f9;
+  }
+  
+  legend {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    padding: 0 10px;
+    background-color: white;
+  }
+  
+  .form-instructions {
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .form-instructions p {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+    color: #495057;
+  }
+  
+  .form-instructions ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #6c757d;
+  }
+  
+  .form-instructions li {
+    margin-bottom: 5px;
+  }
+  
+  .flex-column {
+    margin-bottom: 10px;
+  }
+  
+  .inputForm {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+  }
+  
+  .textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+  
+  /* CSS Visual Validation - Indicadores visuales cuando el input es válido */
+  .input:required:valid {
+    border-color: #28a745;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2328a745"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 35px;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+  }
+  
+  /* CSS Visual Validation - Indicadores visuales cuando el input es inválido */
+  .input:required:invalid, .input:focus:invalid {
+    border-color: #dc3545;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dc3545"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 35px;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
+  }
+  
+  /* Estilos especiales para select */
+  select.input {
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  select.input:required:valid {
+    padding-right: 35px;
+  }
+  
+  .button-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .button-submit:hover {
+    background-color: #218838;
+  }
+  
+  .button-submit:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .back-link {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .back-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .notice {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .notice li {
+    margin-bottom: 5px;
+  }
+  
+  /* Animaciones adicionales para mejor UX */
+  .input:focus {
+    transform: scale(1.01);
+  }
+  
+  .input:valid {
+    animation: validPulse 0.3s ease-in-out;
+  }
+  
+  @keyframes validPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+</style>
+<script src="/js/inv-update.js"></script>
+
+<!-- 🔴 CAMBIO: JavaScript actualizado para el formulario de edición -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('editVehicleForm');
+  const milesInput = document.getElementById('inv_miles');
+  const priceInput = document.getElementById('inv_price');
+  
+  // Validación adicional para el campo de millas (solo números, sin comas)
+  milesInput.addEventListener('input', function(e) {
+    // Remover cualquier caracter que no sea número
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+  });
+  
+  // Validación para que el precio sea positivo
+  priceInput.addEventListener('input', function(e) {
+    if (parseFloat(e.target.value) < 0) {
+      e.target.value = '';
+    }
+  });
+  
+  // Validación final antes de enviar el formulario
+  form.addEventListener('submit', function(e) {
+    const year = document.getElementById('inv_year').value;
+    const miles = document.getElementById('inv_miles').value;
+    const price = document.getElementById('inv_price').value;
+    
+    // Verificar que el año sea de 4 dígitos
+    if (year.length !== 4) {
+      e.preventDefault();
+      alert('Year must be exactly 4 digits.');
+      return false;
+    }
+    
+    // Verificar que las millas sean solo números
+    if (!/^\d+$/.test(miles)) {
+      e.preventDefault();
+      alert('Miles must contain only digits (no commas or spaces).');
+      return false;
+    }
+    
+    // Verificar que el precio sea positivo
+    if (parseFloat(price) <= 0) {
+      e.preventDefault();
+      alert('Price must be a positive number.');
+      return false;
+    }
+  });
+});
+</script>
