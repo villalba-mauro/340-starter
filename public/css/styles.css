@@ -423,9 +423,23 @@ tbody td {
 a {
   color: #0c6f88;
   text-decoration: none;
+  /* border-radius: 10px;
+  padding: 5px;
+  border: 1px solid grey; */
 }
 a:hover {
   text-decoration: underline;
+}
+.link{
+  color: #0c6f88;
+  border-radius: 10px;
+  padding: 5px;
+  border: 1px solid grey;
+}
+.link:hover{
+  color: #388e3c;
+  text-decoration:none ;
+  font-weight: bolder;
 }
 /******* own today ***************/
 .confirmation-grid {
