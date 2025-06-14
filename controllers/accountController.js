@@ -96,7 +96,7 @@ async function accountLogin(req, res) {
   try {
     if (await bcrypt.compare(account_password, accountData.account_password)) {
       delete accountData.account_password
-      const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 })
+      const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 })
       if(process.env.NODE_ENV === 'development') {
         res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 })
       } else {
@@ -105,7 +105,7 @@ async function accountLogin(req, res) {
       return res.redirect("/account/")
     }
     else {
-      req.flash("message notice", "Please check your credentials and try again.")
+      req.flash("notice", "Please check your credentials and try again.")
       res.status(400).render("account/login", {
         title: "Login",
         nav,
@@ -139,7 +139,7 @@ async function buildAccountUpdate(req, res, next) {
   const account_id = parseInt(req.params.account_id)
   
   // Verificar que el usuario solo pueda editar su propia cuenta
-  if (account_id !== res.locals.accountData.account_id) {
+  if (account_id !== parseInt(res.locals.accountData.account_id)) {
     req.flash("notice", "You can only edit your own account.")
     return res.redirect("/account/")
   }
@@ -171,7 +171,7 @@ async function updateAccountInfo(req, res) {
   const { account_id, account_firstname, account_lastname, account_email } = req.body
   
   // Verificar que el usuario solo pueda editar su propia cuenta
-  if (parseInt(account_id) !== res.locals.accountData.account_id) {
+  if (parseInt(account_id) !== parseInt(res.locals.accountData.account_id)) {
     req.flash("notice", "You can only edit your own account.")
     return res.redirect("/account/")
   }
@@ -189,7 +189,7 @@ async function updateAccountInfo(req, res) {
     const updatedAccountData = await accountModel.getAccountById(account_id)
     
     // Actualizar JWT token con nueva información
-    const accessToken = jwt.sign(updatedAccountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 })
+    const accessToken = jwt.sign(updatedAccountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 })
     if(process.env.NODE_ENV === 'development') {
       res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 })
     } else {
@@ -220,7 +220,7 @@ async function updatePassword(req, res) {
   const { account_id, account_password } = req.body
   
   // Verificar que el usuario solo pueda editar su propia cuenta
-  if (parseInt(account_id) !== res.locals.accountData.account_id) {
+  if (parseInt(account_id) !== parseInt(res.locals.accountData.account_id)) {
     req.flash("notice", "You can only edit your own account.")
     return res.redirect("/account/")
   }
@@ -284,60 +284,140 @@ async function buildFavorites(req, res, next) {
 /* ****************************************
 *  Add to favorites
 * *************************************** */
+// async function addToFavorites(req, res) {
+//   const account_id = res.locals.accountData.account_id
+//   const inv_id = parseInt(req.params.inv_id)
+  
+//   try {
+//     const result = await favoritesModel.addToFavorites(account_id, inv_id)
+//     if (result) {
+//       // Respuesta JSON en lugar de redirección
+//       res.json({ 
+//         success: true, 
+//         message: "Vehicle added to favorites!",
+//         action: "added"
+//       })
+//     } else {
+//       res.json({ 
+//         success: false, 
+//         message: "Error adding to favorites." 
+//       })
+//     }
+//   } catch (error) {
+//     res.json({ 
+//       success: false, 
+//       message: "Vehicle is already in your favorites." 
+//     })
+//   }
+// }
 async function addToFavorites(req, res) {
   const account_id = res.locals.accountData.account_id
   const inv_id = parseInt(req.params.inv_id)
   
+  // 🔧 VERIFICAR que res sea un objeto response válido
+  if (!res || typeof res.json !== 'function') {
+    console.error('❌ Response object is invalid');
+    return;
+  }
+  
   try {
     const result = await favoritesModel.addToFavorites(account_id, inv_id)
     if (result) {
-      // Respuesta JSON en lugar de redirección
-      res.json({ 
+      // 🔧 ASEGURAR que devolvemos JSON con headers correctos
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(200).json({ 
         success: true, 
         message: "Vehicle added to favorites!",
         action: "added"
-      })
+      });
     } else {
-      res.json({ 
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(400).json({ 
         success: false, 
         message: "Error adding to favorites." 
-      })
+      });
     }
   } catch (error) {
-    res.json({ 
+    console.error('❌ addToFavorites error:', error);
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(500).json({ 
       success: false, 
       message: "Vehicle is already in your favorites." 
-    })
+    });
   }
 }
+
+
 /* ****************************************
 *  Remove from favorites
 * *************************************** */
+// MODIFICA TEMPORALMENTE esta función en controllers/accountController.js:
+
 async function removeFromFavorites(req, res) {
   const account_id = res.locals.accountData.account_id
   const inv_id = parseInt(req.params.inv_id)
   
+  // 🔧 VERIFICAR que res sea un objeto response válido
+  if (!res || typeof res.json !== 'function') {
+    console.error('❌ Response object is invalid');
+    return;
+  }
+  
   try {
     const result = await favoritesModel.removeFromFavorites(account_id, inv_id)
     if (result) {
-      res.json({ 
+      // 🔧 ASEGURAR que devolvemos JSON con headers correctos
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(200).json({ 
         success: true, 
         message: "Vehicle removed from favorites!",
         action: "removed"
-      })
+      });
     } else {
-      res.json({ 
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(400).json({ 
         success: false, 
         message: "Error removing from favorites." 
-      })
+      });
     }
   } catch (error) {
-    res.json({ 
+    console.error('❌ removeFromFavorites error:', error);
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(500).json({ 
       success: false, 
       message: "Error removing from favorites." 
-    })
+    });
   }
 }
+
+/* ****************************************
+*  Remove from favorites
+* *************************************** */
+// async function removeFromFavorites(req, res) {
+//   const account_id = res.locals.accountData.account_id
+//   const inv_id = parseInt(req.params.inv_id)
+  
+//   try {
+//     const result = await favoritesModel.removeFromFavorites(account_id, inv_id)
+//     if (result) {
+//       res.json({ 
+//         success: true, 
+//         message: "Vehicle removed from favorites!",
+//         action: "removed"
+//       })
+//     } else {
+//       res.json({ 
+//         success: false, 
+//         message: "Error removing from favorites." 
+//       })
+//     }
+//   } catch (error) {
+//     res.json({ 
+//       success: false, 
+//       message: "Error removing from favorites." 
+//     })
+//   }
+// }
 
 module.exports = { 
   buildLogin, 

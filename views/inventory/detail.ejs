@@ -7,15 +7,19 @@
 <!-- ✅ FAVORITES: Botones AJAX para usuarios logueados -->
 <% if (locals.loggedin) { %>
   <div class="favorite-section">
-    <button id="favoriteBtn" 
+    <button type="button"
+            id="favoriteBtn" 
             class="btn-favorite <%= locals.isFavorite ? 'favorited' : '' %>"
             data-inv-id="<%= locals.vehicle.inv_id %>"
             data-is-favorite="<%= locals.isFavorite ? 'true' : 'false' %>">
       <span class="btn-icon"><%= locals.isFavorite ? '❤️' : '🤍' %></span>
       <span class="btn-text"><%= locals.isFavorite ? 'Remove from Favorites' : 'Add to Favorites' %></span>
     </button>
+    
+<% } else { %>
+  <div class="favorite-section">
+    <p><a href="/account/login">Login</a> to add this vehicle to your favorites!</p>
   </div>
-
 <% } %>
 
 <style>
@@ -36,6 +40,8 @@
   font-weight: bold;
   transition: all 0.3s ease;
   border: 2px solid;
+  cursor: pointer;
+  background: none;
 }
 
 .btn-favorite:not(.favorited) {
@@ -65,38 +71,76 @@
   text-decoration: none;
   transform: translateY(-2px);
 }
+
+.btn-favorite:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 </style>
+
+<!-- REEMPLAZA todo el JavaScript en views/inventory/detail.ejs con esto: -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const favoriteBtn = document.getElementById('favoriteBtn');
   
   if (favoriteBtn) {
-    favoriteBtn.addEventListener('click', function() {
+    // 🔧 IMPORTANTE: Remover event listeners previos para evitar duplicados
+    favoriteBtn.replaceWith(favoriteBtn.cloneNode(true));
+    const newFavoriteBtn = document.getElementById('favoriteBtn');
+    
+    newFavoriteBtn.addEventListener('click', function(e) {
+      // 🔧 PREVENIR comportamiento por defecto
+      e.preventDefault();
+      e.stopPropagation();
+      
       const invId = this.dataset.invId;
       const isFavorite = this.dataset.isFavorite === 'true';
       const action = isFavorite ? 'remove' : 'add';
       const url = `/account/favorites/${action}/${invId}`;
       
+      console.log('🔍 DEBUG: Haciendo petición a:', url);
+      console.log('🔍 DEBUG: Acción:', action);
+      
       // Deshabilitar botón durante petición
       this.disabled = true;
       this.style.opacity = '0.6';
       
-      // Petición AJAX
+      // 🔧 PETICIÓN AJAX MEJORADA
       fetch(url, {
         method: 'GET',
         headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        credentials: 'same-origin'  // 🔧 Incluir cookies de sesión
       })
-      .then(response => response.json())
-      .then(data => {
-        // Mostrar toast inmediatamente
-        const toastType = data.success ? 'success' : 'error';
-        showToast(data.message, toastType);
+      .then(response => {
+        console.log('🔍 DEBUG: Response status:', response.status);
+        console.log('🔍 DEBUG: Response headers:', response.headers.get('content-type'));
         
+        // 🔧 VERIFICAR que la respuesta sea JSON
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
+        
+        return response.json();
+      })
+      .then(data => {
+        console.log('🔍 DEBUG: Data received:', data);
+        
+        // 🔧 MOSTRAR TOAST SEGÚN RESULTADO
         if (data.success) {
-          // Actualizar botón sin recargar página
+          showToast(data.message, 'success');
+          
+          // 🔧 ACTUALIZAR BOTÓN SIN RECARGAR PÁGINA
           const newIsFavorite = data.action === 'added';
           this.dataset.isFavorite = newIsFavorite.toString();
           this.className = newIsFavorite ? 'btn-favorite favorited' : 'btn-favorite';
@@ -111,14 +155,16 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.textContent = '🤍';
             text.textContent = 'Add to Favorites';
           }
+        } else {
+          showToast(data.message || 'Error processing request', 'error');
         }
       })
       .catch(error => {
-        console.error('Error:', error);
+        console.error('❌ Fetch error:', error);
         showToast('Connection error. Please try again.', 'error');
       })
       .finally(() => {
-        // Re-habilitar botón
+        // 🔧 RE-HABILITAR BOTÓN
         this.disabled = false;
         this.style.opacity = '1';
       });

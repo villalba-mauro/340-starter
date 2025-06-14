@@ -33,8 +33,18 @@ invCont.buildByInvId = async function (req, res, next) {
   // Check if user is logged in and if vehicle is in favorites
   let isFavorite = false
   if (res.locals.loggedin) {
+    // 🔍 DEBUG temporal: agregar logs
+    console.log('🔍 Checking favorite for user:', res.locals.accountData.account_id, 'vehicle:', inv_id);
     isFavorite = await favoritesModel.isFavorite(res.locals.accountData.account_id, inv_id)
+    console.log('🔍 Result isFavorite:', isFavorite);
   }
+  
+  console.log('🔍 Sending to view:', {
+    inv_id,
+    account_id: res.locals.accountData?.account_id,
+    isFavorite,
+    loggedin: res.locals.loggedin
+  });
   
   res.render("./inventory/detail", {
     title: vehicleTitle,
@@ -44,7 +54,6 @@ invCont.buildByInvId = async function (req, res, next) {
     isFavorite,
   })
 }
-
 /* ***************************
  *  Build management view 
  * ************************** */

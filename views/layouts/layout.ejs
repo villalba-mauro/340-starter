@@ -93,6 +93,125 @@
     </style>
 
     <script>
+    console.log('🔍 === LAYOUT SCRIPT START ===');
+    console.log('🔍 Layout script loaded');
+    
+    // Sistema Toast - DEFINIR GLOBALMENTE
+    window.showToast = function(message, type = 'info', duration = 4000) {
+      console.log('🍞 === SHOWTOAST CALLED ===');
+      console.log('🍞 Message:', message);
+      console.log('🍞 Type:', type);
+      console.log('🍞 Duration:', duration);
+      
+      const container = document.getElementById('toast-container');
+      console.log('🍞 Toast container:', container);
+      
+      if (!container) {
+        console.error('❌ Toast container not found in DOM');
+        console.log('🔍 Available elements with id:', 
+          Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+        );
+        alert(message); // Fallback
+        return;
+      }
+      
+      console.log('✅ Toast container found, creating toast...');
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️'
+      };
+      
+      const icon = icons[type] || icons.info;
+      console.log('🍞 Using icon:', icon);
+      
+      toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+      `;
+      
+      console.log('🍞 Toast HTML created:', toast.outerHTML);
+      
+      container.appendChild(toast);
+      console.log('🍞 Toast appended to container');
+      
+      // Mostrar con animación
+      setTimeout(() => {
+        console.log('🍞 Adding show class...');
+        toast.classList.add('show');
+      }, 10);
+      
+      // Auto-eliminar
+      setTimeout(() => {
+        console.log('🍞 Auto-removing toast...');
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentElement) {
+            toast.remove();
+            console.log('🍞 Toast removed from DOM');
+          }
+        }, 300);
+      }, duration);
+      
+      console.log('✅ showToast completed successfully');
+    }
+
+    // Verificar disponibilidad inmediata
+    console.log('🔍 window.showToast defined:', typeof window.showToast === 'function');
+
+    // Interceptar mensajes flash y convertirlos a toast
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔍 === DOM CONTENT LOADED ===');
+      console.log('🔍 DOM loaded, checking for flash messages');
+      console.log('🔍 window.showToast available:', typeof window.showToast === 'function');
+      
+      // Verificar que el container existe
+      const container = document.getElementById('toast-container');
+      console.log('🔍 Toast container in DOM:', !!container);
+      
+      // Buscar mensajes flash existentes
+      const flashMessages = document.querySelectorAll('.pop-up .notice, .pop-up [class*="notice"]');
+      console.log('🔍 Found flash messages:', flashMessages.length);
+      
+      flashMessages.forEach(function(message, index) {
+        const text = message.textContent.trim();
+        console.log(`🔍 Flash message ${index}:`, text);
+        
+        if (text) {
+          // Determinar tipo basado en contenido
+          let type = 'info';
+          if (text.includes('added to favorites') || text.includes('successfully') || text.includes('Congratulations')) {
+            type = 'success';
+          } else if (text.includes('error') || text.includes('failed') || text.includes('Error')) {
+            type = 'error';
+          }
+          
+          console.log(`🔍 Converting flash message to toast (${type}):`, text);
+          
+          // Mostrar como toast
+          window.showToast(text, type);
+          
+          // Ocultar mensaje flash original
+          const parentFlash = message.closest('.pop-up');
+          if (parentFlash) {
+            parentFlash.style.display = 'none';
+            console.log('🔍 Hidden original flash message');
+          }
+        }
+      });
+      
+      console.log('🔍 === DOM CONTENT LOADED END ===');
+    });
+    
+    console.log('🔍 === LAYOUT SCRIPT END ===');
+    </script>
+
+    <!-- <script>
     // Sistema Toast
     function showToast(message, type = 'info', duration = 4000) {
       const container = document.getElementById('toast-container');
@@ -154,6 +273,6 @@
         }
       });
     });
-    </script>
+    </script> -->
   </body>
 </html>
