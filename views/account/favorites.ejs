@@ -19,7 +19,7 @@
     
     <div class="favorites-grid">
       <% favorites.forEach(function(vehicle) { %>
-        <div class="favorite-item">
+        <div class="favorite-item" data-vehicle-id="<%= vehicle.inv_id %>">
           <div class="favorite-image">
             <a href="/inv/detail/<%= vehicle.inv_id %>">
               <img src="<%= vehicle.inv_thumbnail %>" 
@@ -41,9 +41,13 @@
             
             <div class="favorite-actions">
               <a href="/inv/detail/<%= vehicle.inv_id %>" class="btn-view">View Details</a>
-              <a href="/account/favorites/remove/<%= vehicle.inv_id %>?returnTo=/account/favorites" 
-                 class="btn-remove" 
-                 onclick="return confirm('Remove from favorites?')">Remove</a>
+              <!-- 🔧 CAMBIO: Ahora es un botón que usa AJAX en lugar de enlace -->
+              <button type="button" 
+                      class="btn-remove" 
+                      data-inv-id="<%= vehicle.inv_id %>"
+                      data-vehicle-name="<%= vehicle.inv_year %> <%= vehicle.inv_make %> <%= vehicle.inv_model %>">
+                Remove
+              </button>
             </div>
           </div>
         </div>
@@ -130,7 +134,7 @@
 
 .favorite-actions {
   margin-top: 15px;
-  /* display: flex; */
+  display: flex;
   gap: 10px;
 }
 
@@ -142,7 +146,9 @@
   text-align: center;
   cursor: pointer;
   border: none;
-  display: inline-block;
+  flex: 1;
+  transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .btn-view, .btn-browse {
@@ -154,6 +160,7 @@
   background-color: #0056b3;
   color: white;
   text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .btn-remove {
@@ -165,6 +172,13 @@
   background-color: #c82333;
   color: white;
   text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.btn-remove:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .empty-favorites {
@@ -192,6 +206,133 @@
 .back-link a:hover {
   text-decoration: underline;
 }
+
+/* Indicador de que un vehículo está siendo eliminado */
+.favorite-item.removing {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Animación de eliminación */
+.favorite-item.fade-out {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+}
 </style>
+
+<!-- 🔧 NUEVO: JavaScript AJAX para manejar la eliminación de favoritos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔍 Favorites page loaded, setting up remove buttons');
+  
+  // Obtener todos los botones de remove
+  const removeButtons = document.querySelectorAll('.btn-remove');
+  console.log('🔍 Found remove buttons:', removeButtons.length);
+  
+  removeButtons.forEach(function(button) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const invId = this.dataset.invId;
+      const vehicleName = this.dataset.vehicleName;
+      
+      console.log('🔍 Remove button clicked for vehicle:', vehicleName, 'ID:', invId);
+      
+      // Confirmar eliminación
+      if (!confirm(`Remove "${vehicleName}" from favorites?`)) {
+        console.log('🔍 User cancelled removal');
+        return;
+      }
+      
+      // Encontrar el contenedor del vehículo
+      const vehicleItem = this.closest('.favorite-item');
+      if (!vehicleItem) {
+        console.error('❌ Could not find vehicle item container');
+        return;
+      }
+      
+      // Deshabilitar botón y mostrar estado de carga
+      this.disabled = true;
+      this.textContent = 'Removing...';
+      vehicleItem.classList.add('removing');
+      
+      // URL para la petición AJAX
+      const url = `/account/favorites/remove/${invId}`;
+      console.log('🔍 Making AJAX request to:', url);
+      
+      // 🔧 PETICIÓN AJAX
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        console.log('🔍 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
+        
+        return response.json();
+      })
+      .then(data => {
+        console.log('🔍 Response data:', data);
+        
+        if (data.success) {
+          // ✅ ÉXITO: Mostrar toast y eliminar el vehículo de la vista
+          showToast(data.message, 'success');
+          
+          // Animar y eliminar el elemento
+          vehicleItem.classList.add('fade-out');
+          setTimeout(() => {
+            vehicleItem.remove();
+            
+            // Verificar si quedan favoritos
+            const remainingItems = document.querySelectorAll('.favorite-item');
+            if (remainingItems.length === 0) {
+              // Si no quedan favoritos, recargar la página para mostrar el mensaje de "No favorites"
+              location.reload();
+            } else {
+              // Actualizar contador si existe
+              const countText = document.querySelector('.favorites-container p');
+              if (countText && countText.textContent.includes('vehicle(s)')) {
+                const newCount = remainingItems.length;
+                countText.textContent = `You have ${newCount} vehicle(s) in your favorites.`;
+              }
+            }
+          }, 300);
+          
+        } else {
+          // ❌ ERROR: Mostrar mensaje y restaurar botón
+          showToast(data.message || 'Error removing from favorites', 'error');
+          this.disabled = false;
+          this.textContent = 'Remove';
+          vehicleItem.classList.remove('removing');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Fetch error:', error);
+        showToast('Connection error. Please try again.', 'error');
+        
+        // Restaurar botón
+        this.disabled = false;
+        this.textContent = 'Remove';
+        vehicleItem.classList.remove('removing');
+      });
+    });
+  });
+});
+</script>
 
 <% } else { res.redirect('/') } %>
