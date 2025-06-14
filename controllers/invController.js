@@ -1,5 +1,6 @@
 const invModel = require("../models/inventory-model")
 const utilities = require("../utilities/")
+const favoritesModel = require("../models/favorites-model")
 
 const invCont = {}
 
@@ -28,10 +29,19 @@ invCont.buildByInvId = async function (req, res, next) {
   const detailHtml = await utilities.buildDetailView(data)
   let nav = await utilities.getNav()
   const vehicleTitle = `${data.inv_year} ${data.inv_make} ${data.inv_model}`
+  
+  // Check if user is logged in and if vehicle is in favorites
+  let isFavorite = false
+  if (res.locals.loggedin) {
+    isFavorite = await favoritesModel.isFavorite(res.locals.accountData.account_id, inv_id)
+  }
+  
   res.render("./inventory/detail", {
     title: vehicleTitle,
     nav,
     detailHtml,
+    vehicle: data,
+    isFavorite,
   })
 }
 

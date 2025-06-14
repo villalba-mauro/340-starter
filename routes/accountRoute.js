@@ -9,7 +9,10 @@ const { buildLogin,
         buildAccountUpdate,
         updateAccountInfo,
         updatePassword,
-        accountLogout
+        accountLogout,
+        buildFavorites,
+        addToFavorites,
+        removeFromFavorites
 } = require("../controllers/accountController")
 const utilities = require("../utilities/")
 const regValidate = require('../utilities/account-validation')
@@ -64,5 +67,16 @@ router.post(
 )
 // 🔴 NUEVA RUTA: Process logout
 router.get("/logout", utilities.handleErrors(accountLogout))
+
+// Route to build favorites view
+router.get("/favorites", utilities.checkLogin, utilities.handleErrors(buildFavorites))
+
+// Route to add vehicle to favorites
+router.get("/favorites/add/:inv_id", utilities.checkLogin, utilities.handleErrors(addToFavorites))
+
+// Route to remove vehicle from favorites  
+router.get("/favorites/remove/:inv_id", utilities.checkLogin, utilities.handleErrors(removeFromFavorites))
+
+
 
 module.exports = router;

@@ -1,13 +1,128 @@
 <%# Vehicle Detail Page - Página de detalle del vehículo %>
 
-<%# Content Heading - Displays the vehicle title in both title and h1 %>
-<% if (title) { %>
-<h1><%= title %></h1>
-<% } else { %>
-<h1>Vehicle Details</h1>
-<% } %>
-
 <%# Vehicle Detail Display - Shows the detailed vehicle information %>
 <div class="detail-container">
   <%- detailHtml %>
-</div>
+  
+<!-- ✅ FAVORITES: Botones AJAX para usuarios logueados -->
+<% if (locals.loggedin) { %>
+  <div class="favorite-section">
+    <button id="favoriteBtn" 
+            class="btn-favorite <%= locals.isFavorite ? 'favorited' : '' %>"
+            data-inv-id="<%= locals.vehicle.inv_id %>"
+            data-is-favorite="<%= locals.isFavorite ? 'true' : 'false' %>">
+      <span class="btn-icon"><%= locals.isFavorite ? '❤️' : '🤍' %></span>
+      <span class="btn-text"><%= locals.isFavorite ? 'Remove from Favorites' : 'Add to Favorites' %></span>
+    </button>
+  </div>
+
+<% } %>
+
+<style>
+.favorite-section {
+  margin-top: 20px;
+  text-align: center;
+  padding: 15px;
+  border-top: 1px solid #eee;
+}
+
+.btn-favorite {
+  display: inline-block;
+  padding: 12px 24px;
+  margin: 10px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.btn-favorite:not(.favorited) {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.btn-favorite:not(.favorited):hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.btn-favorite.favorited {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.btn-favorite.favorited:hover {
+  background-color: #c82333;
+  border-color: #c82333;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const favoriteBtn = document.getElementById('favoriteBtn');
+  
+  if (favoriteBtn) {
+    favoriteBtn.addEventListener('click', function() {
+      const invId = this.dataset.invId;
+      const isFavorite = this.dataset.isFavorite === 'true';
+      const action = isFavorite ? 'remove' : 'add';
+      const url = `/account/favorites/${action}/${invId}`;
+      
+      // Deshabilitar botón durante petición
+      this.disabled = true;
+      this.style.opacity = '0.6';
+      
+      // Petición AJAX
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Mostrar toast inmediatamente
+        const toastType = data.success ? 'success' : 'error';
+        showToast(data.message, toastType);
+        
+        if (data.success) {
+          // Actualizar botón sin recargar página
+          const newIsFavorite = data.action === 'added';
+          this.dataset.isFavorite = newIsFavorite.toString();
+          this.className = newIsFavorite ? 'btn-favorite favorited' : 'btn-favorite';
+          
+          const icon = this.querySelector('.btn-icon');
+          const text = this.querySelector('.btn-text');
+          
+          if (newIsFavorite) {
+            icon.textContent = '❤️';
+            text.textContent = 'Remove from Favorites';
+          } else {
+            icon.textContent = '🤍';
+            text.textContent = 'Add to Favorites';
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('Connection error. Please try again.', 'error');
+      })
+      .finally(() => {
+        // Re-habilitar botón
+        this.disabled = false;
+        this.style.opacity = '1';
+      });
+    });
+  }
+});
+</script>

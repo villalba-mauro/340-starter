@@ -1,5 +1,6 @@
 const utilities = require("../utilities/")
 const accountModel = require("../models/account-model")
+const favoritesModel = require("../models/favorites-model")
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const bcrypt = require("bcrypt")
@@ -259,7 +260,84 @@ async function accountLogout(req, res) {
   res.redirect("/")
 }
 
+/* ****************************************
+*  Build favorites view
+* *************************************** */
+async function buildFavorites(req, res, next) {
+  let nav = await utilities.getNav()
+  const account_id = res.locals.accountData.account_id
+  
+  try {
+    const favorites = await favoritesModel.getFavoritesByAccount(account_id)
+    res.render("account/favorites", {
+      title: "My Favorites",
+      nav,
+      favorites,
+      errors: null
+    })
+  } catch (error) {
+    req.flash("notice", "Error loading favorites.")
+    res.redirect("/account/")
+  }
+}
 
+/* ****************************************
+*  Add to favorites
+* *************************************** */
+async function addToFavorites(req, res) {
+  const account_id = res.locals.accountData.account_id
+  const inv_id = parseInt(req.params.inv_id)
+  
+  try {
+    const result = await favoritesModel.addToFavorites(account_id, inv_id)
+    if (result) {
+      // Respuesta JSON en lugar de redirección
+      res.json({ 
+        success: true, 
+        message: "Vehicle added to favorites!",
+        action: "added"
+      })
+    } else {
+      res.json({ 
+        success: false, 
+        message: "Error adding to favorites." 
+      })
+    }
+  } catch (error) {
+    res.json({ 
+      success: false, 
+      message: "Vehicle is already in your favorites." 
+    })
+  }
+}
+/* ****************************************
+*  Remove from favorites
+* *************************************** */
+async function removeFromFavorites(req, res) {
+  const account_id = res.locals.accountData.account_id
+  const inv_id = parseInt(req.params.inv_id)
+  
+  try {
+    const result = await favoritesModel.removeFromFavorites(account_id, inv_id)
+    if (result) {
+      res.json({ 
+        success: true, 
+        message: "Vehicle removed from favorites!",
+        action: "removed"
+      })
+    } else {
+      res.json({ 
+        success: false, 
+        message: "Error removing from favorites." 
+      })
+    }
+  } catch (error) {
+    res.json({ 
+      success: false, 
+      message: "Error removing from favorites." 
+    })
+  }
+}
 
 module.exports = { 
   buildLogin, 
@@ -270,5 +348,8 @@ module.exports = {
   buildAccountUpdate,
   updateAccountInfo,
   updatePassword,
-  accountLogout
+  accountLogout,
+  buildFavorites,
+  addToFavorites,
+  removeFromFavorites
 }
